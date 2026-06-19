@@ -69,7 +69,7 @@ const visualBridgeItems: VisualBridgeItem[] = [
     media: [
        {
         type: "image",
-        src: "/images/portfolio/Programming-Sample.png",
+        src: "/images/portfolio/Programming-sample.png",
         alt: "Alexis Building a Mobile App",
         label: "Technical support",
       },
