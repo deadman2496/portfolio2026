@@ -15,7 +15,7 @@ const photoshopProjects = [
     title: "Photoshop lighting styles",
     description:
       "Removing the background of the city and making it a bit calmer",
-    beforeSrc: "/images/projects/photoshop/example-2-before.jpg",
+    beforeSrc: "/images/projects/photoshop/example-2-before.JPG",
     afterSrc: "/images/projects/photoshop/example-2-after.jpg",
     beforeAlt: "Original image before Photoshop background correction",
     afterAlt: "Image after Photoshop background correction",
