@@ -43,7 +43,7 @@ const mediaProjects = [
     title: "Legion Go SSD and a battery mod",
     description:
       "Testing modifying the back of a legion go to expand to a 2280 4tb storage and an 81 kw/h battery and lastly a custom 3-D printed backplate for compatibility.",
-    videoSrc: "/media/projects/Legion-go-mod.mp4",
+    videoSrc: "/media/projects/Legion-Go-mod.mp4",
   },
 ];
 

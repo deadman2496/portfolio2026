@@ -34,6 +34,45 @@ export default function LandingHero() {
   const [isDeletingTitle, setIsDeletingTitle] = useState(false);
 
   useEffect(() => {
+    let isActive = true;
+    const markVideoReady = () => {
+      if (isActive) {
+        setVideoReady(true);
+      }
+    };
+    const video = videoRef.current;
+    const fallbackTimer = window.setTimeout(() => {
+      markVideoReady();
+    }, 1800);
+
+    if (!video) {
+      return () => {
+        isActive = false;
+        window.clearTimeout(fallbackTimer);
+      };
+    }
+
+    video.defaultMuted = true;
+    video.muted = true;
+    video.playsInline = true;
+
+    if (video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
+      markVideoReady();
+    }
+
+    void video.play().then(() => {
+      markVideoReady();
+    }).catch(() => {
+      // iOS can still deny autoplay; the fallback keeps the hero usable.
+    });
+
+    return () => {
+      isActive = false;
+      window.clearTimeout(fallbackTimer);
+    };
+  }, []);
+
+  useEffect(() => {
     if (!videoReady) return;
 
     const timer = window.setTimeout(() => {
@@ -102,6 +141,8 @@ useEffect(() => {
         loop
         playsInline
         preload="auto"
+        onLoadedData={() => setVideoReady(true)}
+        onPlay={() => setVideoReady(true)}
         onCanPlay={() => setVideoReady(true)}
       />
 
