@@ -4,6 +4,7 @@ import AboutTimeline from "@/components/AboutTimeline";
 import AboutStats from "@/components/AboutStats";
 import VisualBridge from "@/components/VisualBridge";
 import ProjectsSection from "@/components/ProjectsSection";
+import SocialHub from "@/components/social/SocialHub";
 
 export default function Home() {
   return (
@@ -14,6 +15,7 @@ export default function Home() {
       <AboutStats />
       <VisualBridge />
       <ProjectsSection />
+      <SocialHub />
     </>
   )
     
