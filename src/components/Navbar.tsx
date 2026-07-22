@@ -2,16 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { useActiveSection } from "@/hooks/useActiveSection";
+import { getVisibleNavLinks } from "@/data/navLinks";
+import type { NavLink } from "@/types/navigation";
+import { useKonamiUnlock } from "@/hooks/useKonamiUnlock";
 import MobileNavbar from "@/components/nav/MobileNavbar";
 
 const NAVBAR_INTRO_DELAY_MS = 2200;
-
-const navLinks = [
-  { id: "home", label: "Home", href: "#home" },
-  { id: "about", label: "About", href: "#about" },
-  { id: "projects", label: "Projects", href: "#projects" },
-  { id: "contact", label: "Contact", href: "#contact" },
-];
 
 const trackedSectionIds = [
   "home",
@@ -19,8 +15,30 @@ const trackedSectionIds = [
   "about-stats",
   "visual-bridge",
   "projects",
+  "social",
+  "work",
+  "apps-sites",
+  "mobile-apps",
+  "websites",
+  "local-ai-assistant",
+  "trading-bot",
   "contact",
 ];
+
+const workRelatedSections = new Set([
+  "work",
+  "projects",
+  "visual-bridge",
+  "social",
+]);
+
+const appsSitesRelatedSections = new Set([
+  "apps-sites",
+  "mobile-apps",
+  "websites",
+  "local-ai-assistant",
+  "trading-bot",
+]);
 
 const bottomDockSections = new Set(["about"]);
 
@@ -30,12 +48,39 @@ const aboutRelatedSections = new Set([
   "visual-bridge",
 ]);
 
-function getActiveLabel(activeNavId: string) {
+function getActiveLabel(navLinks: NavLink[], activeNavId: string) {
   return navLinks.find((link) => link.id === activeNavId)?.label ?? "Home";
+}
+
+function getActiveViewingLabel(activeSection: string, navLinks: NavLink[]) {
+  const subsectionLabels: Record<string, string> = {
+    home: "Home",
+    about: "About",
+    "about-stats": "About Stats",
+    "visual-bridge": "Repairs / Visual Work",
+    projects: "Project Work",
+    social: "Social Hub",
+    work: "Work",
+    "apps-sites": "Apps & Sites",
+    "mobile-apps": "Mobile Apps",
+    websites: "Websites",
+    "local-ai-assistant": "Local AI Assistant",
+    "trading-bot": "Trading Bot",
+    contact: "Contact",
+  };
+
+  return (
+    subsectionLabels[activeSection] ??
+    navLinks.find((link) => link.id === activeSection)?.label ??
+    "Home"
+  );
 }
 
 export default function Navbar() {
   const [navReady, setNavReady] = useState(false);
+  const { isUnlocked: labModeUnlocked } = useKonamiUnlock();
+  const visibleNavLinks = getVisibleNavLinks(labModeUnlocked);
+  const [livePlatformCount, setLivePlatformCount] = useState(0);
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -51,11 +96,66 @@ export default function Navbar() {
 
   const dockToBottom = bottomDockSections.has(activeSection);
 
-  const activeNavId = aboutRelatedSections.has(activeSection)
-    ? "about"
-    : activeSection;
+  useEffect(() => {
+  let isMounted = true;
 
-  const activeLabel = getActiveLabel(activeNavId);
+  async function loadLiveStatus() {
+    try {
+      const response = await fetch("/api/social/live-status", {
+        cache: "no-store",
+      });
+
+      if (!response.ok) return;
+
+      const data = await response.json();
+
+      const liveCount = Array.isArray(data.platforms)
+        ? data.platforms.filter(
+            (platform: { isLive?: boolean }) => platform.isLive,
+          ).length
+        : 0;
+
+      if (isMounted) {
+        setLivePlatformCount(liveCount);
+      }
+    } catch {
+      if (isMounted) {
+        setLivePlatformCount(0);
+      }
+    }
+  }
+
+  void loadLiveStatus();
+
+  const interval = window.setInterval(() => {
+    void loadLiveStatus();
+  }, 60000);
+
+  return () => {
+    isMounted = false;
+    window.clearInterval(interval);
+  };
+}, []);
+
+  const activeNavId = aboutRelatedSections.has(activeSection)
+  ? "about"
+  : workRelatedSections.has(activeSection)
+    ? "work"
+    : appsSitesRelatedSections.has(activeSection)
+      ? "apps-sites"
+      : activeSection;
+
+  const activeLabel = getActiveViewingLabel(activeSection, visibleNavLinks);
+
+  const isViewingSocialHub = activeSection === "social";
+const hasLiveStream = livePlatformCount > 0;
+const showLiveIndicator = isViewingSocialHub && hasLiveStream;
+
+const viewingStatusLabel = showLiveIndicator
+  ? livePlatformCount > 1
+    ? `${activeLabel} · Multi-live`
+    : `${activeLabel} · Live`
+  : activeLabel;
 
   return (
     <>
@@ -82,37 +182,70 @@ export default function Navbar() {
 
         <div className="hidden items-center gap-2 rounded-full border border-white/10 bg-white/[0.06] px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-white/60 shadow-xl backdrop-blur-xl lg:flex">
           <span className="h-2 w-2 rounded-full bg-blue-200 shadow-[0_0_14px_rgba(147,197,253,0.95)]" />
-          Viewing {activeLabel}
+          Viewing {viewingStatusLabel}
         </div>
 
-        <div className="hidden gap-8 text-sm font-semibold text-white/75 md:flex">
-          {navLinks.map((link) => {
-            const isActive = activeNavId === link.id;
+        {visibleNavLinks.map((link) => {
+        const hasChildren = Boolean(link.children?.length);
+        const isActive = activeNavId === link.id;
 
-            return (
-              <a
-                key={link.id}
-                href={link.href}
+        return (
+          <div key={link.id} className="group relative">
+            <a
+              href={link.href}
+              target={link.isExternal ? "_blank" : undefined}
+              rel={link.isExternal ? "noreferrer" : undefined}
+              className={[
+            "rounded-full px-4 py-2 text-sm font-black uppercase tracking-[0.16em] transition hover:bg-white/10 hover:text-white",
+            isActive
+              ? "bg-white/10 text-white shadow-[0_0_24px_rgba(147,197,253,0.12)]"
+              : "text-white/70",
+          ].join(" ")}
+            >
+              {link.label}
+            </a>
+
+            {hasChildren && (
+              <div
                 className={[
-                  "relative flex items-center gap-2 rounded-full px-3 py-2 transition hover:text-white",
-                  isActive
-                    ? "bg-white/10 text-white shadow-[0_0_24px_rgba(147,197,253,0.12)]"
-                    : "text-white/70",
+                  "invisible absolute left-0 top-full z-50 pt-3 opacity-0 transition-all duration-150 ease-out",
+                  "group-hover:visible group-hover:opacity-100",
+                  "group-focus-within:visible group-focus-within:opacity-100",
                 ].join(" ")}
               >
-                {isActive && (
-                  <span className="h-2 w-2 rounded-full bg-blue-200 shadow-[0_0_14px_rgba(147,197,253,0.95)]" />
-                )}
+                <div className="min-w-56 rounded-3xl border border-white/10 bg-slate-950/95 p-2 shadow-2xl backdrop-blur-xl">
+                  {link.children?.map((child) => (
+                    <a
+                      key={child.id}
+                      href={child.href}
+                      target={child.isExternal ? "_blank" : undefined}
+                      rel={child.isExternal ? "noreferrer" : undefined}
+                      className={[
+                        "block rounded-2xl px-4 py-3 text-sm font-bold text-white/65 transition hover:bg-white/10 hover:text-white",
+                        child.isHiddenFeature
+                          ? "border border-dashed border-blue-300/20 text-blue-100/70"
+                          : "",
+                      ].join(" ")}
+                    >
+                      {child.label}
 
-                {link.label}
-              </a>
-            );
-          })}
-        </div>
+                      {child.isHiddenFeature && (
+                        <span className="ml-2 text-[0.65rem] uppercase tracking-[0.16em] text-blue-300/70">
+                          Lab
+                        </span>
+                      )}
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      })}
       </nav>
 
       <MobileNavbar
-        navLinks={navLinks}
+        navLinks={visibleNavLinks}
         activeNavId={activeNavId}
         navReady={navReady}
       />

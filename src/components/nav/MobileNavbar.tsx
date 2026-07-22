@@ -13,16 +13,14 @@ import {
   ICON_CENTER,
   MENU_HEIGHT,
   MENU_WIDTH,
+  branchLayoutByIndex,
   mobileNavOrder,
   orbitLayoutById,
+  stackedBranchLayoutByIndex,
   stackedLayoutById,
 } from "@/components/nav/mobileNavConfig";
+import type { NavLink } from "@/types/navigation";
 
-type NavLink = {
-  id: string;
-  label: string;
-  href: string;
-};
 
 type MobileNavbarProps = {
   navLinks: NavLink[];
@@ -177,7 +175,8 @@ function DefaultIcon({ className }: IconProps) {
 const iconById: Record<string, IconComponent> = {
   home: HomeIcon,
   about: AboutIcon,
-  projects: ProjectsIcon,
+  work: ProjectsIcon,
+  "apps-sites": ProjectsIcon,
   contact: ContactIcon,
 };
 
@@ -189,30 +188,56 @@ export default function MobileNavbar({
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
   const [useStackedLayout, setUseStackedLayout] = useState(false);
+  const [expandedLinkId, setExpandedLinkId] = useState<string | null>(null);
+  const [activeBranchId, setActiveBranchId] = useState<string | null>(null);
+  const activeBranch = navLinks.find((link) => link.id === activeBranchId);
+const isBranchMode = Boolean(activeBranch?.children?.length);
 
 
   const orbitLinks = useMemo(() => {
-    const navLinkById = new Map(navLinks.map((link) => [link.id, link]));
+  const navLinkById = new Map(navLinks.map((link) => [link.id, link]));
 
-    const orderedLinks = mobileNavOrder
-      .map((id) => navLinkById.get(id))
-      .filter((link): link is NavLink => Boolean(link));
+  if (activeBranch?.children?.length) {
+    const activeBranchLayout = useStackedLayout
+      ? stackedBranchLayoutByIndex
+      : branchLayoutByIndex;
 
-    return orderedLinks.map((link, index) => {
+    return activeBranch.children.map((link, index) => {
       const fallbackOffset = -(index + 1) * 58;
-      const activeLayout = useStackedLayout ? stackedLayoutById : orbitLayoutById;
-
-        const layout = activeLayout[link.id] ?? {
-          x: useStackedLayout ? 0 : -110,
-          y: fallbackOffset,
-        };
+      const layout = activeBranchLayout[index] ?? {
+        x: useStackedLayout ? 0 : -110,
+        y: fallbackOffset,
+      };
 
       return {
         ...link,
         ...layout,
       };
     });
-  }, [navLinks, useStackedLayout]);
+  }
+
+  const orderedLinks = mobileNavOrder
+    .map((id) => navLinkById.get(id))
+    .filter((link): link is NavLink => Boolean(link));
+
+  return orderedLinks.map((link, index) => {
+    const fallbackOffset = -(index + 1) * 58;
+    const activeLayout = useStackedLayout ? stackedLayoutById : orbitLayoutById;
+
+    const layout = activeLayout[link.id] ?? {
+      x: useStackedLayout ? 0 : -110,
+      y: fallbackOffset,
+    };
+
+    return {
+      ...link,
+      ...layout,
+    };
+  });
+}, [activeBranch, navLinks, useStackedLayout]);
+
+  const expandedLink = navLinks.find((link) => link.id === expandedLinkId);
+const expandedChildren = expandedLink?.children ?? [];
 
 const trailPoints = useMemo(() => {
   const orbitPoints = orbitLinks.map((link) => {
@@ -249,12 +274,14 @@ const activeLabel = getActiveLabel(navLinks, activeNavId);
 
       if (!menuRef.current?.contains(target)) {
         setIsOpen(false);
+        setActiveBranchId(null);
       }
     }
 
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") {
         setIsOpen(false);
+        setActiveBranchId(null);
       }
     }
 
@@ -269,13 +296,29 @@ const activeLabel = getActiveLabel(navLinks, activeNavId);
     };
   }, []);
 
+    const mainButtonLabel = isBranchMode
+  ? `← ${activeBranch?.label ?? "Back"}`
+  : "Alexis Marroquin";
+
+function handleMainButtonClick() {
+  if (isOpen && isBranchMode) {
+    setActiveBranchId(null);
+    return;
+  }
+
+  setIsOpen((current) => !current);
+}
+
   return (
     <>
     <MobileNavAnimations />
     <button
       type="button"
       aria-label="Close navigation menu"
-      onClick={() => setIsOpen(false)}
+      onClick={() => {
+        setIsOpen(false);
+        setActiveBranchId(null);
+      }}
       className={[
         "fixed inset-0 z-[80] bg-slate-950/35 backdrop-blur-[2px] transition-opacity duration-300 md:hidden",
         isOpen ? "opacity-100" : "pointer-events-none opacity-0",
@@ -341,9 +384,24 @@ const activeLabel = getActiveLabel(navLinks, activeNavId);
           return (
             <a
               key={link.id}
-              href={link.href}
-              onClick={() => setIsOpen(false)}
-              aria-label={`Go to ${link.label}`}
+              href={link.children?.length ? "#" : link.href}
+              target={link.isExternal ? "_blank" : undefined}
+              rel={link.isExternal ? "noreferrer" : undefined}
+              onClick={(event) => {
+                if (link.children?.length) {
+                  event.preventDefault();
+                  setActiveBranchId(link.id);
+                  return;
+                }
+
+                setIsOpen(false);
+                setActiveBranchId(null);
+              }}
+              aria-label={
+                link.children?.length
+                  ? `Open ${link.label} links`
+                  : `Go to ${link.label}`
+              }
               className={[
                 "absolute bottom-0 right-0 flex items-center gap-3 transition-all duration-500 ease-out",
                 isOpen
@@ -411,6 +469,17 @@ const activeLabel = getActiveLabel(navLinks, activeNavId);
           );
         })}
 
+        {isOpen && isBranchMode && (
+          <button
+            type="button"
+            onClick={() => setActiveBranchId(null)}
+            className="absolute bottom-[4.85rem] right-0 rounded-full border border-white/10 bg-slate-950/90 px-4 py-2 text-[10px] font-black uppercase tracking-[0.18em] text-white/70 shadow-2xl backdrop-blur-xl transition hover:bg-white/10 hover:text-white"
+          >
+            ← Back
+          </button>
+        )}
+
+
         <div
           className={[
             "pointer-events-none absolute bottom-[5.25rem] right-0 rounded-full border border-white/10 bg-slate-950/80 px-3 py-2 text-[10px] font-black uppercase tracking-[0.18em] text-white/70 shadow-2xl backdrop-blur-xl transition-all duration-300",
@@ -433,9 +502,15 @@ const activeLabel = getActiveLabel(navLinks, activeNavId);
         )}
         <button
           type="button"
-          aria-label={isOpen ? "Close navigation menu" : "Open navigation menu"}
+          aria-label={
+            isOpen && isBranchMode
+              ? "Back to main navigation"
+              : isOpen
+                ? "Close navigation menu"
+                : "Open navigation menu"
+          }
           aria-expanded={isOpen}
-          onClick={() => setIsOpen((current) => !current)}
+          onClick={handleMainButtonClick}
           className={[
             "absolute bottom-0 right-0 flex h-16 items-center rounded-full border border-white/15 bg-slate-950/88 text-white shadow-[0_18px_40px_rgba(0,0,0,0.45)] backdrop-blur-xl transition-all duration-300",
             isOpen
@@ -471,7 +546,7 @@ const activeLabel = getActiveLabel(navLinks, activeNavId);
               isOpen ? "max-w-40 opacity-100" : "max-w-0 opacity-0",
             ].join(" ")}
           >
-            Alexis Marroquin
+            {mainButtonLabel}
           </span>
         </button>
       </div>

@@ -3,6 +3,13 @@ import type { LivePlatformId, LivePlatformStatus } from "@/types/social";
 
 export const dynamic = "force-dynamic";
 
+const OWNCAST_WATCH_URL =
+  process.env.OWNCAST_WATCH_URL ?? "https://live.alexismarroquin.nyc";
+
+const OWNCAST_EMBED_URL =
+  process.env.OWNCAST_EMBED_URL ??
+  "https://live.alexismarroquin.nyc/embed/video?initiallyMuted=true";
+
 const platformLabels: Record<LivePlatformId, string> = {
   owncast: "Personal Stream",
   youtube: "YouTube",
@@ -13,7 +20,7 @@ const platformLabels: Record<LivePlatformId, string> = {
 
 const platformDescriptions: Record<LivePlatformId, string> = {
   owncast:
-    "The default stream home base. This will eventually connect to your Owncast server.",
+    "The Main Live Feed directly from the computer self-hosted.",
   youtube:
     "Reserved for YouTube livestreams and selected video broadcasts.",
   twitch:
@@ -37,6 +44,20 @@ function isMockLive(platformId: LivePlatformId) {
 
 function buildPlatformStatus(platformId: LivePlatformId): LivePlatformStatus {
   const isLive = isMockLive(platformId);
+
+   if (platformId === "owncast") {
+    return {
+      id: "owncast",
+      label: platformLabels.owncast,
+      description: platformDescriptions.owncast,
+      isLive,
+      playableInline: true,
+      statusLabel: isLive ? "Live now" : "Offline",
+      embedUrl: OWNCAST_EMBED_URL,
+      watchUrl: OWNCAST_WATCH_URL,
+    };
+  }
+
 
   return {
     id: platformId,

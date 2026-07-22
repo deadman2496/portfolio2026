@@ -8,6 +8,18 @@ type LivePlayerShellProps = {
   platform: LivePlatformStatus;
 };
 
+function getOwncastChatUrl(embedUrl?: string) {
+  if (!embedUrl) return undefined;
+
+  try {
+    const url = new URL(embedUrl);
+
+    return `${url.origin}/embed/chat/readwrite`;
+  } catch {
+    return undefined;
+  }
+}
+
 export default function LivePlayerShell({ platform }: LivePlayerShellProps) {
   const [hasStartedPlayback, setHasStartedPlayback] = useState(false);
 
@@ -63,19 +75,54 @@ export default function LivePlayerShell({ platform }: LivePlayerShellProps) {
     );
   }
 
-  if (platform.playableInline && platform.embedUrl) {
+if (platform.playableInline && platform.embedUrl) {
+  const isPersonalStream = platform.id === "owncast";
+  const owncastChatUrl = isPersonalStream
+    ? getOwncastChatUrl(platform.embedUrl)
+    : undefined;
+
+  if (isPersonalStream) {
     return (
-      <div className="aspect-video overflow-hidden rounded-3xl border border-white/10 bg-black shadow-2xl">
-        <iframe
-          src={platform.embedUrl}
-          title={`${platform.label} live player`}
-          allow="autoplay; fullscreen; picture-in-picture"
-          allowFullScreen
-          className="h-full w-full"
-        />
+      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_420px]">
+        <div className="overflow-hidden rounded-3xl border border-white/10 bg-black shadow-2xl aspect-[16/8.15] md:aspect-[16/8.35]">
+          <iframe
+            src={platform.embedUrl}
+            title={`${platform.label} live player`}
+            allow="autoplay; fullscreen; picture-in-picture"
+            allowFullScreen
+            scrolling="no"
+            className="h-full w-full border-0"
+          />
+        </div>
+
+        {owncastChatUrl && (
+          <aside className="overflow-hidden rounded-3xl border border-white/10 bg-black shadow-2xl">
+
+            <iframe
+              src={owncastChatUrl}
+              title="Owncast stream chat"
+              className="h-[420px] w-full border-0 lg:h-full xl:min-h-[520px]"
+            />
+          </aside>
+        )}
       </div>
     );
   }
+
+  return (
+    <div className="aspect-video overflow-hidden rounded-3xl border border-white/10 bg-black shadow-2xl">
+      <iframe
+        src={platform.embedUrl}
+        title={`${platform.label} live player`}
+        allow="autoplay; fullscreen; picture-in-picture"
+        allowFullScreen
+        scrolling="no"
+        className="h-full w-full border-0"
+      />
+    </div>
+  );
+}
+
 
   return (
     <div className="flex aspect-video flex-col items-center justify-center rounded-3xl border border-white/10 bg-black/40 p-6 text-center shadow-2xl">
