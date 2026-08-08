@@ -33,7 +33,17 @@ jobs:
 
           chmod 600 "$HOME/.ssh/id_ed25519"
           chmod 600 "$HOME/.ssh/known_hosts"
+      - name: Validate known host
+        env:
+          SSH_HOST: ${{ secrets.STAGING_SSH_HOST }}
+        run: |
+          if ! ssh-keygen -F "$SSH_HOST" -f "$HOME/.ssh/known_hosts" >/dev/null; then
+            echo "No matching known_hosts entry for STAGING_SSH_HOST"
+            exit 1
+          fi
 
+          echo "Known host entry found."
+    
       - name: Trigger staging deployment
         env:
           SSH_HOST: ${{ secrets.STAGING_SSH_HOST }}
