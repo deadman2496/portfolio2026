@@ -208,7 +208,8 @@ const viewingStatusLabel = showLiveIndicator
             {hasChildren && (
               <div
                 className={[
-                  "invisible absolute left-0 top-full z-50 pt-3 opacity-0 transition-all duration-150 ease-out",
+                  "invisible absolute left-0 z-50 opacity-0 transition-all duration-150 ease-out",
+                  dockToBottom ? "bottom-full pb-3" : "top-full pt-3",
                   "group-hover:visible group-hover:opacity-100",
                   "group-focus-within:visible group-focus-within:opacity-100",
                 ].join(" ")}

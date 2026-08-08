@@ -191,7 +191,8 @@ export default function MobileNavbar({
   const [expandedLinkId, setExpandedLinkId] = useState<string | null>(null);
   const [activeBranchId, setActiveBranchId] = useState<string | null>(null);
   const activeBranch = navLinks.find((link) => link.id === activeBranchId);
-const isBranchMode = Boolean(activeBranch?.children?.length);
+  const isBranchMode = Boolean(activeBranch?.children?.length);
+  const [pressedLinkId, setPressedLinkId] = useState<string | null>(null);
 
 
   const orbitLinks = useMemo(() => {
@@ -252,20 +253,27 @@ const activeLabel = getActiveLabel(navLinks, activeNavId);
 
 
   useEffect(() => {
-  const mediaQuery = window.matchMedia("(max-width: 389px)");
+    const narrowPhoneQuery = window.matchMedia("(max-width: 389px)");
+    const compactLandscapeQuery = window.matchMedia(
+      "(orientation: landscape) and (max-height: 520px)",
+    );
 
-  function updateLayout() {
-    setUseStackedLayout(mediaQuery.matches);
-  }
+    function updateLayout() {
+      setUseStackedLayout(
+        narrowPhoneQuery.matches || compactLandscapeQuery.matches,
+      );
+    }
 
-  updateLayout();
+    updateLayout();
 
-  mediaQuery.addEventListener("change", updateLayout);
+    narrowPhoneQuery.addEventListener("change", updateLayout);
+    compactLandscapeQuery.addEventListener("change", updateLayout);
 
-  return () => {
-    mediaQuery.removeEventListener("change", updateLayout);
-  };
-}, []);  
+    return () => {
+      narrowPhoneQuery.removeEventListener("change", updateLayout);
+      compactLandscapeQuery.removeEventListener("change", updateLayout);
+    };
+  }, []);
 
   useEffect(() => {
     function handlePointerDown(event: MouseEvent | TouchEvent) {
@@ -379,6 +387,7 @@ function handleMainButtonClick() {
 
         {orbitLinks.map((link, index) => {
           const isActive = activeNavId === link.id;
+          const isPressed = pressedLinkId === link.id;
           const Icon = iconById[link.id] ?? DefaultIcon;
 
           return (
@@ -387,6 +396,10 @@ function handleMainButtonClick() {
               href={link.children?.length ? "#" : link.href}
               target={link.isExternal ? "_blank" : undefined}
               rel={link.isExternal ? "noreferrer" : undefined}
+              onPointerDown={() => setPressedLinkId(link.id)}
+              onPointerUp={() => setPressedLinkId(null)}
+              onPointerCancel={() => setPressedLinkId(null)}
+              onPointerLeave={() => setPressedLinkId(null)}
               onClick={(event) => {
                 if (link.children?.length) {
                   event.preventDefault();
@@ -403,14 +416,14 @@ function handleMainButtonClick() {
                   : `Go to ${link.label}`
               }
               className={[
-                "absolute bottom-0 right-0 flex items-center gap-3 transition-all duration-500 ease-out",
+                "absolute bottom-0 right-0 flex touch-manipulation items-center gap-3 transition-all duration-500 ease-out",
                 isOpen
                   ? "pointer-events-auto opacity-100"
                   : "pointer-events-none opacity-0",
               ].join(" ")}
               style={{
                 transform: isOpen
-                  ? `translate(${link.x}px, ${link.y}px) scale(1)`
+                  ? `translate(${link.x}px, ${link.y}px) scale(${isPressed ? 0.94 : 1})`
                   : "translate(0px, 0px) scale(0.65)",
                 transitionDelay: isOpen ? `${index * 55}ms` : "0ms",
               }}

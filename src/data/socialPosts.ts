@@ -2,25 +2,25 @@ import type { SelectedSocialPost } from "@/types/social";
 
 export const selectedSocialPosts: SelectedSocialPost[] = [
   {
-    id: "instagram-z-fold-repair",
-    platform: "instagram",
-    title: "Galaxy Z Fold 3 repair",
-    description:
-      "A selected repair post showing the damaged device, restoration process, or final result.",
-    url: "https://www.instagram.com/",
-    thumbnail: "/images/social/post-thumbnails/z-fold-repair.jpg",
-    publishedAt: "2026",
-  },
+  id: "instagram-mirror-01",
+  platform: "instagram",
+  title: "Instagram post mirror",
+  description:
+    "A portfolio-friendly mirror of an Instagram update with a direct link back to the original post.",
+  url: "https://www.instagram.com/p/DFA6bi-PK7C/",
+  thumbnail: "/images/social/post-thumbnails/instagram-mirror-01.jpg",
+  publishedAt: "2026",
+},
   {
-    id: "youtube-portfolio-demo",
-    platform: "youtube",
-    title: "Portfolio project demo",
-    description:
-      "A selected video walkthrough or project update hosted on YouTube.",
-    url: "https://www.youtube.com/",
-    thumbnail: "/images/social/post-thumbnails/portfolio-demo.jpg",
-    publishedAt: "2026",
-  },
+  id: "youtube-recorded-demo-01",
+  platform: "youtube",
+  title: "Recorded livestream / project update",
+  description:
+    "A recorded video pulled into the Social Hub so visitors can watch it without needing to hunt through the channel.",
+  url: "https://www.youtube.com/watch?v=St5HCLvrr5Y",
+  thumbnail: "/images/social/post-thumbnails/youtube-demo-01.png",
+  publishedAt: "2023",
+},
 
   // Hidden future feature.
   // Keep this commented out until you have an X post ready,

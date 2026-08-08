@@ -58,6 +58,22 @@ function buildPlatformStatus(platformId: LivePlatformId): LivePlatformStatus {
     };
   }
 
+  if (platformId === "youtube") {
+  return {
+    id: "youtube",
+    label: "YouTube Live",
+    description:
+      "YouTube livestreams open directly on YouTube when available.",
+    isLive,
+    playableInline: false,
+    statusLabel: isLive ? "Live on YouTube" : "External only",
+    watchUrl:
+      process.env.YOUTUBE_LIVE_URL ??
+      process.env.YOUTUBE_CHANNEL_URL ??
+      "https://www.youtube.com/",
+  };
+}
+
 
   return {
     id: platformId,
