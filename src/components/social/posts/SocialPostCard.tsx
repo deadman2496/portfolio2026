@@ -5,7 +5,7 @@ const platformLabels: Record<SelectedSocialPost["platform"], string> = {
   instagram: "Instagram",
   youtube: "YouTube",
   x: "X",
-  Linkedin: "Linkedin",
+  linkedin: "Linkedin",
 };
 
 type SocialPostCardProps = {

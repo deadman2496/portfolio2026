@@ -9,7 +9,7 @@ export type SelectedSocialPlatform =
   | "instagram"
   | "youtube"
   | "x"
-  | "Linkedin";
+  | "linkedin";
 
 export type LivePlatformStatus = {
   id: LivePlatformId;

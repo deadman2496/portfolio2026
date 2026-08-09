@@ -35,7 +35,7 @@ const platformOptions: PlatformOption[] = [
     isHiddenFeature: true,
   },
   {
-    id: "Linkedin",
+    id: "linkedin",
     label: "Linkedin",
     isHiddenFeature: true,
   },

@@ -38,7 +38,7 @@ export const selectedSocialPosts: SelectedSocialPost[] = [
   },
   {
   id: "linkedin-future-update",
-  platform: "Linkedin",
+  platform: "linkedin",
   title: "Future LinkedIn update",
   description:
     "Reserved for a future LinkedIn post once professional updates are ready to highlight.",

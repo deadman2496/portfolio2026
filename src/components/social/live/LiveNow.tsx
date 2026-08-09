@@ -25,7 +25,9 @@ function getVisiblePlatforms(
   showHiddenPlatforms: boolean,
 ) {
   return platforms.filter((platform) => {
-    if (platform.id !== "facebook") return true;
+    if (platform.id === "owncast" || platform.id === "twitch") {
+      return true;
+    }
 
     return showHiddenPlatforms;
   });
