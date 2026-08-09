@@ -20,6 +20,9 @@ function getOwncastChatUrl(embedUrl?: string) {
   }
 }
 
+const livePlayerFrameClassName =
+  "relative z-10 overflow-hidden rounded-3xl border border-white/10 bg-black shadow-2xl min-h-[300px] sm:min-h-[360px] md:aspect-video md:min-h-0";
+
 export default function LivePlayerShell({ platform }: LivePlayerShellProps) {
   const [hasStartedPlayback, setHasStartedPlayback] = useState(false);
 
@@ -137,7 +140,7 @@ if (platform.playableInline && platform.embedUrl) {
   if (isPersonalStream) {
     return (
       <div className="grid gap-5 pb-32 md:pb-0 xl:grid-cols-[minmax(0,1fr)_420px]">
-        <div className="relative z-10 overflow-hidden rounded-3xl border border-white/10 bg-black shadow-2xl aspect-[16/8.15] md:aspect-[16/8.35]">
+        <div className="relative z-10 overflow-hidden rounded-3xl border border-white/10 bg-black shadow-2xl min-h-[300px] sm:min-h-[360px] md:aspect-[16/8.35] md:min-h-0">
           <iframe
             src={platform.embedUrl}
             title={`${platform.label} live player`}
@@ -165,17 +168,31 @@ if (platform.playableInline && platform.embedUrl) {
   }
 
   return (
-    <div className="aspect-video overflow-hidden rounded-3xl border border-white/10 bg-black shadow-2xl">
+  <div className="space-y-3 pb-32 md:pb-0">
+    <div className={livePlayerFrameClassName}>
       <iframe
         src={platform.embedUrl}
         title={`${platform.label} live player`}
         allow="autoplay; fullscreen; picture-in-picture"
         allowFullScreen
+        referrerPolicy="origin"
         scrolling="no"
         className="h-full w-full border-0"
       />
     </div>
-  );
+
+    {platform.watchUrl && (
+      <a
+        href={platform.watchUrl}
+        target="_blank"
+        rel="noreferrer"
+        className="inline-flex min-h-12 w-full items-center justify-center rounded-2xl border border-white/15 px-5 py-4 text-center text-sm font-black text-white/75 transition active:scale-[0.98] md:w-auto md:rounded-full md:py-3 md:hover:bg-white/10 md:hover:text-white"
+      >
+        Open {platform.label}
+      </a>
+    )}
+  </div>
+);
 }
 
 
