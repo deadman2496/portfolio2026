@@ -53,4 +53,5 @@ jobs:
             -i "$HOME/.ssh/id_ed25519" \
             -o BatchMode=yes \
             -o IdentitiesOnly=yes \
-            "$SSH_USER@$SSH_HOST"
+            "$SSH_USER@$SSH_HOST" \
+            "/opt/portfolio-infrastructure/websites/alexis/scripts/deploy-staging.sh"
