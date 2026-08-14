@@ -30,13 +30,17 @@ const platformOptions: PlatformOption[] = [
     label: "YouTube",
   },
   {
+    id: "twitch",
+    label: "Twitch",
+  },
+  {
     id: "x",
     label: "X",
     isHiddenFeature: true,
   },
   {
     id: "linkedin",
-    label: "Linkedin",
+    label: "LinkedIn",
     isHiddenFeature: true,
   },
 ];

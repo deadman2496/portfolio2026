@@ -31,10 +31,20 @@ export const selectedSocialPosts: SelectedSocialPost[] = [
     title: "Future X update",
     description:
       "Reserved for a future X post when there is something worth highlighting.",
-    url: "https://x.com/",
-    thumbnail: "/images/social/post-thumbnails/x-placeholder.jpg",
+    url: "https://x.com/Deadman2496/status/2088254908147318862",
+    thumbnail: "/images/social/post-thumbnails/x-placeholder.gif",
     publishedAt: "Future",
     isHiddenFeature: true,
+  },
+  {
+  id: "twitch-vod-01",
+  platform: "twitch",
+  title: "Twitch stream replay",
+  description:
+    "A selected Twitch stream, clip, or VOD connected to live project work, gameplay testing, or portfolio progress.",
+  url: "https://www.twitch.tv/deadman2496/videos",
+  thumbnail: "/images/social/post-thumbnails/twitch-vod-01.jpg",
+  publishedAt: "2026",
   },
   {
   id: "linkedin-future-update",
@@ -42,8 +52,8 @@ export const selectedSocialPosts: SelectedSocialPost[] = [
   title: "Future LinkedIn update",
   description:
     "Reserved for a future LinkedIn post once professional updates are ready to highlight.",
-  url: "https://www.linkedin.com/",
-  thumbnail: "/images/social/post-thumbnails/linkedin-placeholder.jpg",
+  url: "https://www.linkedin.com/feed/update/urn:li:activity:7489399936418205696/",
+  thumbnail: "/images/social/post-thumbnails/linkedin-placeholder.png",
   publishedAt: "Future",
   isHiddenFeature: true,
 },

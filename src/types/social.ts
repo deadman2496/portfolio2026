@@ -8,6 +8,7 @@ export type LivePlatformId =
 export type SelectedSocialPlatform =
   | "instagram"
   | "youtube"
+  | "twitch"
   | "x"
   | "linkedin";
 

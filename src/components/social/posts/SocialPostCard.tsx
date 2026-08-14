@@ -1,9 +1,9 @@
 import type { SelectedSocialPost } from "@/types/social";
-import Image from "next/image";
 
 const platformLabels: Record<SelectedSocialPost["platform"], string> = {
   instagram: "Instagram",
   youtube: "YouTube",
+  twitch: "Twitch",
   x: "X",
   linkedin: "Linkedin",
 };
