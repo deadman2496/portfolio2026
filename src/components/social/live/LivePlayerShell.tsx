@@ -130,32 +130,45 @@ if (platform.playableInline && platform.embedUrl) {
     );
   }
 
-  return (
-  <div className="space-y-3 pb-32 md:pb-0">
-    <div className={livePlayerFrameClassName}>
-      <iframe
-        src={platform.embedUrl}
-        title={`${platform.label} live player`}
-        allow="autoplay; fullscreen; picture-in-picture"
-        allowFullScreen
-        referrerPolicy="origin"
-        scrolling="no"
-        className="h-full w-full border-0"
-      />
-    </div>
+  const isTwitchStream = platform.id === "twitch";
 
-    {platform.watchUrl && (
-      <a
-        href={platform.watchUrl}
-        target="_blank"
-        rel="noreferrer"
-        className="inline-flex min-h-12 w-full items-center justify-center rounded-2xl border border-white/15 px-5 py-4 text-center text-sm font-black text-white/75 transition active:scale-[0.98] md:w-auto md:rounded-full md:py-3 md:hover:bg-white/10 md:hover:text-white"
-      >
-        Open {platform.label}
-      </a>
-    )}
-  </div>
-);
+    return (
+      <div className="space-y-3 pb-32 md:pb-0">
+        <div
+          className={[
+            isTwitchStream ? "overflow-x-auto rounded-3xl" : "",
+          ].join(" ")}
+        >
+          <div
+            className={[
+              livePlayerFrameClassName,
+              isTwitchStream ? "min-w-[400px]" : "",
+            ].join(" ")}
+          >
+            <iframe
+              src={platform.embedUrl}
+              title={`${platform.label} live player`}
+              allow="autoplay; fullscreen; picture-in-picture"
+              allowFullScreen
+              referrerPolicy="origin"
+              scrolling="no"
+              className="h-full w-full border-0"
+            />
+          </div>
+        </div>
+
+        {platform.watchUrl && (
+          <a
+            href={platform.watchUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex min-h-12 w-full items-center justify-center rounded-2xl border border-white/15 px-5 py-4 text-center text-sm font-black text-white/75 transition active:scale-[0.98] md:w-auto md:rounded-full md:py-3 md:hover:bg-white/10 md:hover:text-white"
+          >
+            Open {platform.label}
+          </a>
+        )}
+      </div>
+    );
 }
 
 
