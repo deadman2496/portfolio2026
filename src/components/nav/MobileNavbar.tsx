@@ -335,7 +335,7 @@ function handleMainButtonClick() {
     <div
       ref={menuRef}
       className={[
-        "fixed bottom-5 right-5 z-[90] md:hidden transition-all duration-700 ease-out",
+        "pointer-events-none fixed bottom-5 right-5 z-[90] md:hidden transition-all duration-700 ease-out",
         navReady
           ? "translate-y-0 opacity-100"
           : "pointer-events-none translate-y-6 opacity-0",
@@ -525,7 +525,7 @@ function handleMainButtonClick() {
           aria-expanded={isOpen}
           onClick={handleMainButtonClick}
           className={[
-            "absolute bottom-0 right-0 flex h-16 items-center rounded-full border border-white/15 bg-slate-950/88 text-white shadow-[0_18px_40px_rgba(0,0,0,0.45)] backdrop-blur-xl transition-all duration-300",
+            "pointer-events-auto absolute bottom-0 right-0 flex h-16 items-center rounded-full border border-white/15 bg-slate-950/88 text-white shadow-[0_18px_40px_rgba(0,0,0,0.45)] backdrop-blur-xl transition-all duration-300",
             isOpen
               ? "w-56 justify-start gap-3 px-4"
               : "w-16 justify-center px-0",
