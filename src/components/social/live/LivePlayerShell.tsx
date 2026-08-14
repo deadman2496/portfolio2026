@@ -67,7 +67,12 @@ export default function LivePlayerShell({ platform }: LivePlayerShellProps) {
     
   if (!hasStartedPlayback) {
   return (
-    <div className="space-y-3">
+    <button
+      type="button"
+      onClick={() => setHasStartedPlayback(true)}
+      className="block w-full rounded-3xl text-left transition active:scale-[0.99] md:hover:scale-[1.01]"
+      aria-label={`Open ${platform.label} player inside the portfolio`}
+    >
       <div className="relative min-h-[320px] overflow-hidden rounded-3xl border border-red-400/25 bg-black shadow-2xl md:aspect-video md:min-h-0">
         <div className="absolute inset-0 bg-gradient-to-br from-red-950/70 via-slate-950 to-blue-950/60" />
 
@@ -81,53 +86,11 @@ export default function LivePlayerShell({ platform }: LivePlayerShellProps) {
           </h4>
 
           <p className="mt-4 max-w-xl text-sm leading-6 text-white/60 md:text-base">
-            Playback stays paused until the visitor chooses to start it.
+            Tap to open the stream inside the portfolio.
           </p>
-
-          <div className="mt-6 hidden flex-wrap items-center justify-center gap-3 md:flex">
-            <button
-              type="button"
-              onClick={() => setHasStartedPlayback(true)}
-              className="rounded-full bg-white px-5 py-3 text-sm font-black text-slate-950 transition hover:scale-[1.02]"
-            >
-              Play preview
-            </button>
-
-            {platform.watchUrl && (
-              <a
-                href={platform.watchUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="rounded-full border border-white/15 px-5 py-3 text-sm font-black text-white/75 transition hover:bg-white/10 hover:text-white"
-              >
-                Open platform
-              </a>
-            )}
-          </div>
         </div>
       </div>
-
-      <div className="relative z-20 grid gap-3 pb-32 md:hidden">
-        <button
-          type="button"
-          onClick={() => setHasStartedPlayback(true)}
-          className="min-h-14 w-full rounded-2xl bg-white px-5 py-4 text-base font-black text-slate-950 shadow-xl transition active:scale-[0.98]"
-        >
-          Play preview
-        </button>
-
-        {platform.watchUrl && (
-          <a
-            href={platform.watchUrl}
-            target="_blank"
-            rel="noreferrer"
-            className="min-h-12 w-full rounded-2xl border border-white/15 px-5 py-4 text-center text-sm font-black text-white/75 transition active:scale-[0.98]"
-          >
-            Open platform
-          </a>
-        )}
-      </div>
-    </div>
+    </button>
   );
 }
 

@@ -94,6 +94,11 @@ export default function LiveNow({
     visiblePlatforms.find((platform) => platform.id === activePlatformId) ??
     visiblePlatforms[0];
 
+  const activePlatformWatchUrl =
+  activePlatform?.isLive && activePlatform.watchUrl
+    ? activePlatform.watchUrl
+    : undefined;
+
   return (
     <div>
       <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
@@ -150,23 +155,52 @@ export default function LiveNow({
             onSelectPlatform={setActivePlatformId}
           />
 
-          <div className="mt-5 rounded-2xl border border-white/10 bg-black/20 p-4">
-          <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-            <div>
-              <p className="text-sm font-black text-white">
-                {activePlatform.label}
-              </p>
+          {activePlatformWatchUrl ? (
+            <a
+              href={activePlatformWatchUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="mt-5 block rounded-2xl border border-white/10 bg-black/20 p-4 transition hover:border-white/20 hover:bg-white/[0.06] active:scale-[0.99]"
+            >
+              <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+                <div>
+                  <p className="text-sm font-black text-white">
+                    {activePlatform.label}
+                  </p>
 
-              <p className="mt-1 text-xs leading-5 text-white/50">
-                {activePlatform.description}
-              </p>
+                  <p className="mt-1 text-xs leading-5 text-white/50">
+                    {activePlatform.description}
+                  </p>
+
+                  <p className="mt-3 text-xs font-black uppercase tracking-[0.16em] text-blue-200/80">
+                    Open stream page
+                  </p>
+                </div>
+
+                <p className="w-fit rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[0.65rem] font-black uppercase tracking-[0.18em] text-white/50">
+                  {activePlatform.statusLabel}
+                </p>
+              </div>
+            </a>
+          ) : (
+            <div className="mt-5 rounded-2xl border border-white/10 bg-black/20 p-4">
+              <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+                <div>
+                  <p className="text-sm font-black text-white">
+                    {activePlatform.label}
+                  </p>
+
+                  <p className="mt-1 text-xs leading-5 text-white/50">
+                    {activePlatform.description}
+                  </p>
+                </div>
+
+                <p className="w-fit rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[0.65rem] font-black uppercase tracking-[0.18em] text-white/50">
+                  {activePlatform.statusLabel}
+                </p>
+              </div>
             </div>
-
-            <p className="w-fit rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[0.65rem] font-black uppercase tracking-[0.18em] text-white/50">
-              {activePlatform.statusLabel}
-            </p>
-          </div>
-        </div>
+          )}
           <div className="mt-6">
             <LivePlayerShell 
               key={activePlatform.id}
