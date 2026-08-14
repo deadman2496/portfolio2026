@@ -103,7 +103,7 @@ if (platform.playableInline && platform.embedUrl) {
   if (isPersonalStream) {
     return (
       <div className="grid gap-5 pb-32 md:pb-0 xl:grid-cols-[minmax(0,1fr)_420px]">
-        <div className="relative z-10 overflow-hidden rounded-3xl border border-white/10 bg-black shadow-2xl min-h-[300px] sm:min-h-[360px] md:aspect-[16/8.35] md:min-h-0">
+        <div className="relative z-10 aspect-video w-full overflow-hidden rounded-3xl border border-white/10 bg-black shadow-2xl">
           <iframe
             src={platform.embedUrl}
             title={`${platform.label} live player`}
