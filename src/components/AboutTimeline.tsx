@@ -1,13 +1,39 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { getAboutTimelineItems } from "@/data/resume";
 import { useActiveSection } from "@/hooks/useActiveSection";
 import { useDelayedAutoScroll } from "@/hooks/useDelayedAutoScroll";
+import {
+  getAboutTimelineItems,
+  type ResumeExperience,
+  type ResumeTag,
+} from "@/data/resume";
 import Reveal from "@/components/Reveal";
 import TimelineList from "@/components/about/TimelineList";
 import TimelineDesktopDetails from "@/components/about/TimelineDesktopDetails";
 import TimelineMobileSheet from "@/components/about/TimeLineMobileSheet";
+
+type PublicStudioExperienceItem = {
+  id: string;
+  type: "work" | "project" | "education" | "certification" | "volunteer";
+  organization: string;
+  role: string;
+  location?: string;
+  startDate: string;
+  endDate?: string;
+  isCurrent: boolean;
+  summary?: string;
+  bullets: string[];
+  skills: string[];
+  focusTags?: ResumeTag[];
+  visibility: "public" | "lab" | "draft";
+  sortOrder: number;
+
+};
+
+type AboutTimelineProps = {
+  showHiddenExperience?: boolean;
+};
 
 const DETAILS_AUTO_SCROLL_DELAY_MS = 2500;
 
@@ -28,8 +54,106 @@ function isMobileViewport() {
   return window.matchMedia("(max-width: 1023px)").matches;
 }
 
-export default function AboutTimeline() {
-  const timelineItems = useMemo(() => getAboutTimelineItems(), []);
+function getStudioCategory(
+  type: PublicStudioExperienceItem["type"],
+): ResumeExperience["category"] {
+  if (type === "education" || type === "certification") {
+    return "Education";
+  }
+
+  if (type === "project" || type === "volunteer") {
+    return "Business";
+  }
+
+  return "Work";
+}
+
+function getStudioTimelineYear(item: PublicStudioExperienceItem) {
+  if (item.isCurrent) {
+    return "Now";
+  }
+
+  if (item.endDate) {
+    return item.endDate.slice(0, 4);
+  }
+
+  return item.startDate.slice(0, 4);
+}
+
+function getStudioDateRange(item: PublicStudioExperienceItem) {
+  const endLabel = item.isCurrent ? "Present" : item.endDate ?? item.startDate;
+
+  return `${item.startDate} – ${endLabel}`;
+}
+
+function getTimelineEndDate(item: ResumeExperience) {
+  if (item.end === null) {
+    return "9999-12";
+  }
+
+  if (item.end) {
+    return item.end;
+  }
+
+  return item.start || "0000-00";
+}
+
+function sortTimelineItems(items: ResumeExperience[]) {
+  return [...items].sort((a, b) => {
+    const endCompare = getTimelineEndDate(a).localeCompare(
+      getTimelineEndDate(b),
+    );
+
+    if (endCompare !== 0) {
+      return endCompare;
+    }
+
+    return (a.start || "0000-00").localeCompare(b.start || "0000-00");
+  });
+}
+
+function mapStudioExperienceToTimelineItem(
+  item: PublicStudioExperienceItem,
+): ResumeExperience {
+  const generalTag: ResumeTag = "general";
+  const focusTags =
+  Array.isArray(item.focusTags) && item.focusTags.length > 0
+    ? item.focusTags
+    : [generalTag];
+
+  return {
+    id: `studio-${item.id}`,
+    title: item.role,
+    company: item.organization,
+    location: item.location ?? "",
+    start: item.startDate,
+    end: item.isCurrent ? null : item.endDate ?? item.startDate,
+    dateRange: getStudioDateRange(item),
+    category: getStudioCategory(item.type),
+    timelineYear: getStudioTimelineYear(item),
+    summary: item.summary ?? `${item.role} at ${item.organization}.`,
+    tags: focusTags,
+    bullets: Array.isArray(item.bullets)
+  ? item.bullets.map((bullet) => ({
+      text: bullet,
+      tags: focusTags,
+    }))
+  : [],
+  };
+}
+
+export default function AboutTimeline({
+  showHiddenExperience = false,
+}: AboutTimelineProps) {
+  const hardcodedTimelineItems = useMemo(() => getAboutTimelineItems(), []);
+  const [studioTimelineItems, setStudioTimelineItems] = useState<
+    ResumeExperience[]
+  >([]);
+
+  const timelineItems = useMemo(
+    () => sortTimelineItems([...hardcodedTimelineItems, ...studioTimelineItems]),
+    [hardcodedTimelineItems, studioTimelineItems],
+  );
   const [activeId, setActiveId] = useState(timelineItems[0]?.id ?? "");
   const [hasSelectedTimelineItem, setHasSelectedTimelineItem] = useState(false);
   const [isMobileSheetOpen, setIsMobileSheetOpen] = useState(false);
@@ -54,9 +178,14 @@ export default function AboutTimeline() {
   });
 
   const activeItem =
-    timelineItems.find((item) => item.id === activeId) ?? timelineItems[0];
+  timelineItems.find((item) => item.id === activeId) ?? timelineItems[0];
 
-  const activeIndex = timelineItems.findIndex((item) => item.id === activeId);
+  const effectiveActiveId = activeItem?.id ?? "";
+
+  const activeIndex = timelineItems.findIndex(
+    (item) => item.id === effectiveActiveId,
+  );
+
   const safeActiveIndex = Math.max(activeIndex, 0);
 
   function getNextTimelineIndexFromKey(key: string) {
@@ -192,7 +321,7 @@ export default function AboutTimeline() {
 
     return () => window.clearTimeout(renderDelay);
   }, [
-    activeId,
+    effectiveActiveId,
     autoScrollRequestId,
     hasSelectedTimelineItem,
     startDetailsAutoScroll,
@@ -244,6 +373,57 @@ export default function AboutTimeline() {
     };
   }, [isAboutSectionActive, safeActiveIndex, hasSelectedTimelineItem, timelineItems]);
 
+
+    useEffect(() => {
+    let isMounted = true;
+
+    async function loadStudioExperience() {
+      try {
+        const experienceUrl = `/api/studio/public-experience${
+          showHiddenExperience ? "?lab=true" : ""
+        }`;
+
+        const response = await fetch(experienceUrl, {
+          cache: "no-store",
+        });
+
+        if (!response.ok) {
+        if (isMounted) {
+          setStudioTimelineItems([]);
+        }
+
+        return;
+      }
+
+        const data = await response.json();
+
+        const mappedItems = Array.isArray(data.items)
+          ? (data.items as PublicStudioExperienceItem[]).map(
+              mapStudioExperienceToTimelineItem,
+            )
+          : [];
+
+        if (isMounted) {
+          setStudioTimelineItems(mappedItems);
+        }
+      } catch (error) {
+      if (isMounted) {
+        setStudioTimelineItems([]);
+      }
+
+      if (process.env.NODE_ENV === "development") {
+        console.warn("Unable to load Studio experience timeline items.", error);
+      }
+    }
+    }
+
+    loadStudioExperience();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [showHiddenExperience]);
+
   if (!activeItem) {
     return null;
   }
@@ -278,7 +458,7 @@ export default function AboutTimeline() {
             <Reveal direction="left" delayMs={150}>
               <TimelineList
                 timelineItems={timelineItems}
-                activeId={activeId}
+                activeId={effectiveActiveId}
                 hasSelectedTimelineItem={hasSelectedTimelineItem}
                 timelineContainerRef={timelineContainerRef}
                 buttonRefs={buttonRefs}

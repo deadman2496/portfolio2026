@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { selectedSocialPosts } from "@/data/socialPosts";
 import type {
   SelectedSocialPlatform,
@@ -45,9 +45,26 @@ const platformOptions: PlatformOption[] = [
   },
 ];
 
+const selectedPostPlatformIds = new Set<SelectedSocialPlatform>([
+  "instagram",
+  "youtube",
+  "twitch",
+  "x",
+  "linkedin",
+]);
+
 type SelectedPostsProps = {
   showHiddenPlatforms?: boolean;
 };
+
+function isSelectedSocialPlatform(
+  value: unknown,
+): value is SelectedSocialPlatform {
+  return (
+    typeof value === "string" &&
+    selectedPostPlatformIds.has(value as SelectedSocialPlatform)
+  );
+}
 
 function shouldShowPost(
   post: SelectedSocialPost,
@@ -68,11 +85,12 @@ function shouldShowPost(
 function shouldShowPlatformOption(
   option: PlatformOption,
   showHiddenPlatforms: boolean,
+  posts: SelectedSocialPost[],
 ) {
   if (option.id === "all") return true;
   if (!option.isHiddenFeature) return true;
 
-  const hasVisiblePostForPlatform = selectedSocialPosts.some(
+  const hasVisiblePostForPlatform = posts.some(
     (post) => post.platform === option.id && !post.isHiddenFeature,
   );
 
@@ -84,21 +102,70 @@ export default function SelectedPosts({
 }: SelectedPostsProps) {
   const [activeFilter, setActiveFilter] =
     useState<SelectedPostsFilter>("all");
+  const [studioPosts, setStudioPosts] = useState<SelectedSocialPost[]>([]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadStudioPosts() {
+      try {
+        const response = await fetch(
+          `/api/studio/public-content?placement=selected-posts&lab=${
+            showHiddenPlatforms ? "true" : "false"
+          }`,
+          {
+            cache: "no-store",
+          },
+        );
+
+        if (!response.ok) return;
+
+        const data = await response.json();
+
+        const publicStudioPosts = Array.isArray(data.items)
+          ? (data.items as SelectedSocialPost[]).filter((post) =>
+              isSelectedSocialPlatform(post.platform),
+            )
+          : [];
+
+        if (isMounted) {
+          setStudioPosts(publicStudioPosts);
+        }
+      } catch {
+        // Keep hardcoded fallback posts if Studio content cannot load.
+      }
+    }
+
+    loadStudioPosts();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [showHiddenPlatforms]);
+
+  const combinedPosts = useMemo(() => {
+    const studioPostIds = new Set(studioPosts.map((post) => post.id));
+
+    return [
+      ...studioPosts,
+      ...selectedSocialPosts.filter((post) => !studioPostIds.has(post.id)),
+    ];
+  }, [studioPosts]);
 
   const visiblePlatformOptions = useMemo(
     () =>
       platformOptions.filter((option) =>
-        shouldShowPlatformOption(option, showHiddenPlatforms),
+        shouldShowPlatformOption(option, showHiddenPlatforms, combinedPosts),
       ),
-    [showHiddenPlatforms],
+    [combinedPosts, showHiddenPlatforms],
   );
 
   const visiblePosts = useMemo(
     () =>
-      selectedSocialPosts.filter((post) =>
+      combinedPosts.filter((post) =>
         shouldShowPost(post, activeFilter, showHiddenPlatforms),
       ),
-    [activeFilter, showHiddenPlatforms],
+    [activeFilter, combinedPosts, showHiddenPlatforms],
   );
 
   return (
@@ -150,27 +217,29 @@ export default function SelectedPosts({
           );
         })}
       </div>
-        <p className="mb-4 text-xs font-bold uppercase tracking-[0.18em] text-white/35 md:hidden">
+
+      <p className="mb-4 text-xs font-bold uppercase tracking-[0.18em] text-white/35 md:hidden">
         Swipe to browse posts
-        </p>
+      </p>
+
       {visiblePosts.length > 0 ? (
         <div
-  aria-label="Selected social posts"
-  className={[
-    "flex snap-x snap-mandatory gap-5 overflow-x-auto scroll-smooth pb-4",
-    "[-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
-    "md:grid md:snap-none md:grid-cols-2 md:overflow-visible md:pb-0 xl:grid-cols-3",
-  ].join(" ")}
->
-  {visiblePosts.map((post) => (
-    <div
-        key={post.id}
-        className="min-w-[82%] snap-start sm:min-w-[360px] md:min-w-0"
+          aria-label="Selected social posts"
+          className={[
+            "flex snap-x snap-mandatory gap-5 overflow-x-auto scroll-smooth pb-4",
+            "[-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
+            "md:grid md:snap-none md:grid-cols-2 md:overflow-visible md:pb-0 xl:grid-cols-3",
+          ].join(" ")}
         >
-        <SocialPostCard post={post} />
+          {visiblePosts.map((post) => (
+            <div
+              key={post.id}
+              className="min-w-[82%] snap-start sm:min-w-[360px] md:min-w-0"
+            >
+              <SocialPostCard post={post} />
+            </div>
+          ))}
         </div>
-    ))}
-    </div>
       ) : (
         <div className="rounded-3xl border border-dashed border-white/10 bg-black/20 p-8 text-center">
           <p className="text-lg font-black text-white">

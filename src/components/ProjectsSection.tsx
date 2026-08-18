@@ -1,5 +1,6 @@
 import Reveal from "@/components/Reveal";
 import BeforeAfterSlider from "@/components/projects/BeforeAfterSlider";
+import StudioSelectedProjects from "@/components/projects/StudioSelectedProjects";
 
 const photoshopProjects = [
   {
@@ -50,7 +51,10 @@ const mediaProjects = [
 export default function ProjectsSection() {
   return (
     <section id="projects" className="bg-slate-950 px-6 py-24 text-white">
+
+      
       <div className="mx-auto max-w-6xl">
+        
         <Reveal direction="up">
           <div className="mb-12 max-w-3xl">
             <p className="mb-3 text-sm font-bold uppercase tracking-[0.3em] text-blue-300">
@@ -68,6 +72,8 @@ export default function ProjectsSection() {
             </p>
           </div>
         </Reveal>
+
+        <StudioSelectedProjects  />
 
         <div className="grid gap-6 lg:grid-cols-2">
           {photoshopProjects.map((project, index) => (
