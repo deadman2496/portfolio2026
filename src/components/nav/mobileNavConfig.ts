@@ -16,7 +16,7 @@ export const orbitLayoutById: Record<string, { x: number; y: number }> = {
   about: { x: -86, y: -238 },
   work: { x: -160, y: -176 },
   "apps-sites": { x: -186, y: -104 },
-  contact: { x: -142, y: -36 },
+  contact: { x: -150, y: -113 },
 };
 
 export const stackedLayoutById: Record<string, { x: number; y: number }> = {
@@ -24,7 +24,7 @@ export const stackedLayoutById: Record<string, { x: number; y: number }> = {
   about: { x: 0, y: -262 },
   work: { x: 0, y: -194 },
   "apps-sites": { x: 0, y: -126 },
-  contact: { x: 0, y: -58 },
+  contact: { x: 0, y: -109 },
 };
 
 export const branchLayoutByIndex = [

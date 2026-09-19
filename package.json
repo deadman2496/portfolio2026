@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev -p 3001",
-    "build": "next build",
+    "dev": "next dev --webpack -p 3001",
+    "build": "next build --webpack",
     "start": "next start",
     "lint": "eslint",
     "refresh": "rimraf .next node_modules/.cache",
@@ -12,7 +12,7 @@
     "reset": "rimraf .next node_modules/.cache node_modules package-lock.json && npm install"
   },
   "dependencies": {
-    "next": "16.2.9",
+    "next": "^16.3.1",
     "react": "19.2.4",
     "react-dom": "19.2.4"
   },
