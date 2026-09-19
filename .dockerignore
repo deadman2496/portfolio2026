@@ -9,3 +9,6 @@ yarn-error.log*
 .env.local
 .env.*.local
 
+
+# Never include environment/secrets files in Docker build context
+.env*
